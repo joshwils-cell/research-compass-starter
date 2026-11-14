@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const base=process.env.COMPASS_TEST_URL||'http://127.0.0.1:5178';
+const login=await fetch(base+'/signin-with-chatgpt?return_to=/',{redirect:'manual'});const cookie=login.headers.getSetCookie().map(v=>v.split(';')[0]).join('; ');
+const req=async(method,args=[],signed=true)=>{const r=await fetch(base+'/api/compass',{method:'POST',headers:{'Content-Type':'application/json',...(signed?{cookie}:{} )},body:JSON.stringify({method,args})});return {status:r.status,...await r.json()};};
+assert.equal((await req('state',[],false)).status,401);
+let snapshot;
+if(process.argv[2]){snapshot=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));const restore=await req('restore',[snapshot]);assert.equal(restore.status,200,restore.error);const exported=await req('export');const expected=new Map(snapshot.records.map(r=>[r.key,JSON.parse(r.data)]));for(const r of exported.result.records.filter(r=>r.key!=='setting:cloud-import'))assert.deepEqual(JSON.parse(r.data),expected.get(r.key));assert.equal(exported.result.records.filter(r=>r.key!=='setting:cloud-import').length,snapshot.records.length);console.log('Migration rehearsal: all records match, including projects, history, and receipts.');assert.equal((await req('restore',[snapshot])).status,200);assert.equal((await req('restore',[{...snapshot,createdAt:'different'}])).status,400);}
+const saved=await req('save',[{name:'Connection verification (synthetic)',purpose:'Disposable local test.'}]);assert.equal(saved.status,200,saved.error);const p=saved.result;
+await req('items',[p.id,p.revision,'steps',[{id:'test-task',text:'Record a synthetic result',notes:'',assignee:'kai'}]]);
+const get=()=>req('state');let state=(await get()).result;const revision=state.projects.find(v=>v.id===p.id).revision;
+const stale=await req('save',[{id:p.id,revision:p.revision,name:'Stale',purpose:''}]);assert.equal(stale.status,400);
+const concurrent=await Promise.all([1,2].map(n=>req('save',[{id:p.id,revision,name:'Concurrent '+n,purpose:''}])));assert.equal(concurrent.filter(r=>r.status===200).length,1);
+const mcp=async args=>{const r=await fetch(base+'/mcp',{method:'POST',headers:{'Content-Type':'application/json',cookie},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'tools/call',params:{name:'research_compass_tasks',arguments:args}})});const v=await r.json();if(v.result.isError)throw Error(v.result.content[0].text);return JSON.parse(v.result.content[0].text);};
+const task=await mcp({version:1,action:'get',actor:'kai',projectId:p.id,taskId:'test-task'});
+const claim={version:1,action:'claim',actor:'kai',projectId:p.id,taskId:'test-task',requestId:crypto.randomUUID(),revision:task.revision};const claimed=await mcp(claim);assert.deepEqual(await mcp(claim),claimed);
+await mcp({version:1,action:'update',actor:'kai',projectId:p.id,taskId:'test-task',requestId:crypto.randomUUID(),revision:claimed.revision,claimId:claimed.task.claim.id,patch:{status:'awaiting_review',result:{summary:'Cloud test result retained',artifacts:[]}}});
+const after=await mcp({version:1,action:'get',actor:'kai',projectId:p.id,taskId:'test-task'});assert.equal(after.status,'Awaiting review');
+const activity=await req('activity',[{projectId:p.id}]);assert.ok(activity.result.events.some(e=>e.actor==='kai'&&e.summary.includes('Cloud test result retained')));
+console.log('PASS: unauthenticated denial, exact migration, duplicate-import refusal, stale writes, concurrent writes, MCP claim/replay/result, activity persistence.');

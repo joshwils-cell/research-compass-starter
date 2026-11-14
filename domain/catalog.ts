@@ -1,0 +1,11 @@
+import {z} from 'zod';
+import type {CodexLink,ContextSelection,CodexProjectOption} from '../src/compass-types';
+export const catalogSchema=z.object({version:z.literal(1),syncedAt:z.string().datetime(),projects:z.array(z.object({id:z.string().min(1).max(200),title:z.string().min(1).max(500),roots:z.array(z.string().max(4000)).max(100)})).max(1000),chats:z.array(z.object({id:z.string().min(1).max(200),title:z.string().min(1).max(500),projectId:z.string().max(200).nullable(),updatedAt:z.string().datetime(),archived:z.boolean()})).max(20000)});
+export type Catalog=z.infer<typeof catalogSchema>;
+export const emptyCatalog=():Catalog=>({version:1,syncedAt:new Date(0).toISOString(),projects:[],chats:[]});
+export function validateCatalog(value:unknown){const c=catalogSchema.parse(value);if(new Set(c.projects.map(p=>p.id)).size!==c.projects.length||new Set(c.chats.map(p=>p.id)).size!==c.chats.length)throw Error('Duplicate catalog IDs.');if(c.chats.some(t=>t.projectId&&!c.projects.some(p=>p.id===t.projectId)))throw Error('Chat belongs to an unknown project.');return c;}
+export function selectionGroups(c:Catalog,value:unknown){const selected=z.object({projectIds:z.array(z.string()).max(1000),chatIds:z.array(z.string()).max(20000)}).parse(value);const projects=new Set(selected.projectIds),chats=new Set(selected.chatIds);for(const id of projects)if(!c.projects.some(p=>p.id===id))throw Error('A project is no longer available. Reload the list.');for(const id of chats)if(!c.chats.some(t=>t.id===id))throw Error('A chat is no longer available. Reload the list.');
+ const groups:{project?:CodexProjectOption;links:CodexLink[]}[]=[];
+ for(const p of c.projects){const links:CodexLink[]=[];if(projects.has(p.id))links.push({id:'codex-project:'+p.id,projectId:p.id,title:p.title,roots:p.roots,kind:'project'});for(const t of c.chats.filter(t=>t.projectId===p.id&&chats.has(t.id)))links.push({id:t.id,title:t.title,kind:'conversation',parentProjectId:p.id,parentProjectTitle:p.title});if(links.length)groups.push({project:p,links});}
+ const loose=c.chats.filter(t=>!t.projectId&&chats.has(t.id)).map(t=>({id:t.id,title:t.title,kind:'conversation' as const}));if(loose.length)groups.push({links:loose});if(!groups.length)throw Error('Choose a project or chat.');return groups;
+}

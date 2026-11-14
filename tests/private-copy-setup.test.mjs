@@ -1,0 +1,39 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {spawnSync} from 'node:child_process';
+
+function fixture(run){
+  const parent=fs.realpathSync(os.tmpdir()),root=fs.mkdtempSync(path.join(parent,'compass-private-copy-'));
+  try{
+    fs.mkdirSync(path.join(root,'scripts'));fs.mkdirSync(path.join(root,'.openai'));fs.mkdirSync(path.join(root,'src'));
+    fs.copyFileSync(new URL('../scripts/configure-private-copy.mjs',import.meta.url),path.join(root,'scripts','configure-private-copy.mjs'));
+    fs.writeFileSync(path.join(root,'.openai','hosting.json'),JSON.stringify({project_id:null,d1:'DB',capabilities:['mcp']}));
+    fs.writeFileSync(path.join(root,'src','settings.mjs'),"export const url='https://your-private-compass.example'; export const email='you@example.com';");
+    run(root);
+  }finally{
+    if(!path.resolve(root).startsWith(parent+path.sep)||!path.basename(root).startsWith('compass-private-copy-'))throw Error('Unexpected temporary test path.');
+    fs.rmSync(root,{recursive:true,force:true});
+  }
+}
+const configure=(root,...extra)=>spawnSync(process.execPath,[path.join(root,'scripts','configure-private-copy.mjs'),'--site-id','synthetic-new-site-id','--site-url','https://independent-compass.test','--email','owner@independent.test',...extra],{encoding:'utf8'});
+
+test('private-copy setup binds only a neutral copy and rewrites defaults without touching runtime data',()=>fixture(root=>{
+  fs.mkdirSync(path.join(root,'node_modules'));fs.writeFileSync(path.join(root,'node_modules','settings.mjs'),'you@example.com');
+  fs.writeFileSync(path.join(root,'.env.local'),'DO_NOT_CHANGE=you@example.com');
+  const result=configure(root);assert.equal(result.status,0,result.stderr);
+  const manifest=JSON.parse(fs.readFileSync(path.join(root,'.openai','hosting.json'),'utf8'));
+  assert.deepEqual(manifest,{project_id:'synthetic-new-site-id',d1:'DB',capabilities:['mcp']});
+  const settings=fs.readFileSync(path.join(root,'src','settings.mjs'),'utf8');assert.ok(settings.includes('https://independent-compass.test'));assert.ok(settings.includes('owner@independent.test'));
+  assert.equal(fs.readFileSync(path.join(root,'node_modules','settings.mjs'),'utf8'),'you@example.com');assert.equal(fs.readFileSync(path.join(root,'.env.local'),'utf8'),'DO_NOT_CHANGE=you@example.com');
+  assert.notEqual(configure(root).status,0);assert.equal(fs.readFileSync(path.join(root,'src','settings.mjs'),'utf8'),settings);
+}));
+test('configuration rejects missing/invalid arguments and existing Site identities without writes',()=>fixture(root=>{
+  const settingsFile=path.join(root,'src','settings.mjs'),original=fs.readFileSync(settingsFile,'utf8');
+  assert.notEqual(configure(root,'--email','duplicate@independent.test').status,0);
+  assert.notEqual(spawnSync(process.execPath,[path.join(root,'scripts','configure-private-copy.mjs')]).status,0);
+  fs.writeFileSync(path.join(root,'.openai','hosting.json'),JSON.stringify({project_id:'already-owned-id',d1:'DB'}));
+  assert.notEqual(configure(root).status,0);assert.equal(fs.readFileSync(settingsFile,'utf8'),original);
+}));
