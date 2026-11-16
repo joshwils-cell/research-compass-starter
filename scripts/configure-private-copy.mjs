@@ -23,7 +23,7 @@ function visit(directory){
     if(ignored.has(entry.name)||entry.name.startsWith('.env')||entry.name.startsWith('.dev.vars'))continue;
     const file=path.join(directory,entry.name);
     if(entry.isDirectory())visit(file);
-    else if(entry.isFile()&&/\.(md|mjs|cjs|ts|tsx|js|json|ps1|txt)$/.test(entry.name)&&file!==manifestPath){
+    else if(entry.isFile()&&/\.(md|mjs|cjs|ts|tsx|js|json|ps1|txt)$/.test(entry.name)&&file!==manifestPath&&entry.name!=='private-copy-setup.test.mjs'){
       const old=fs.readFileSync(file,'utf8');let text=old;
       for(const [before,after]of replacements)text=text.replaceAll(before,after);
       if(text!==old)fs.writeFileSync(file,text);

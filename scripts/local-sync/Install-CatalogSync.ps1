@@ -5,13 +5,13 @@ $inputText=[Console]::In.ReadLine()
 $config=$inputText|ConvertFrom-Json
 $credentialFile=Join-Path (Split-Path $InstallDirectory) 'cloud-catalog-sync.xml'
 New-Item -ItemType Directory -Path $InstallDirectory -Force|Out-Null
-foreach($name in @('catalog-reader.mjs','sync-client.mjs','Sync-ResearchCompass.ps1')){Copy-Item -LiteralPath (Join-Path $PSScriptRoot $name) -Destination (Join-Path $InstallDirectory $name) -Force}
+foreach($name in @('catalog-reader.mjs','sync-client.mjs','Sync-ResearchCompass.ps1','Launch-CatalogSync.vbs')){Copy-Item -LiteralPath (Join-Path $PSScriptRoot $name) -Destination (Join-Path $InstallDirectory $name) -Force}
 @{Service=ConvertTo-SecureString $config.service -AsPlainText -Force;Secret=ConvertTo-SecureString $config.secret -AsPlainText -Force}|Export-Clixml -LiteralPath $credentialFile
 $config=$null;$inputText=$null
 $taskName='Research Compass - Codex catalog sync'
-$powershell=Join-Path $env:WINDIR 'System32\WindowsPowerShell\v1.0\powershell.exe'
-$script=Join-Path $InstallDirectory 'Sync-ResearchCompass.ps1'
-$action=New-ScheduledTaskAction -Execute $powershell -Argument ('-NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "'+$script+'"')
+$wscript=Join-Path $env:WINDIR 'System32\wscript.exe'
+$launcher=Join-Path $InstallDirectory 'Launch-CatalogSync.vbs'
+$action=New-ScheduledTaskAction -Execute $wscript -Argument ('//B //NoLogo "'+$launcher+'"')
 $triggers=@((New-ScheduledTaskTrigger -AtLogOn -User ([Security.Principal.WindowsIdentity]::GetCurrent().Name)),(New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(5) -RepetitionInterval (New-TimeSpan -Hours 1)))
 $principal=New-ScheduledTaskPrincipal -UserId ([Security.Principal.WindowsIdentity]::GetCurrent().Name) -LogonType Interactive -RunLevel Limited
 $settings=New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Minutes 3)

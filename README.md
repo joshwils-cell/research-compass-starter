@@ -6,9 +6,15 @@ Research Compass keeps projects and next steps together, including dated tasks, 
 
 ## Start here
 
-- [Download the starter ZIP](https://github.com/joshwils-cell/research-compass-starter/releases)
+- [Download v0.1.1](https://github.com/joshwils-cell/research-compass-starter/releases/tag/v0.1.1) and choose **Research-Compass-Starter.zip** under Assets.
 - [Set up your private copy](docs/PRIVATE-COPY-SETUP.md)
 - [Read the verification limits](VERIFICATION.md)
+
+Unzip into a new folder, open that folder in Codex, and paste the setup prompt
+in [PRIVATE-COPY-START-HERE.md](PRIVATE-COPY-START-HERE.md). Codex first checks
+for Sites access, then helps configure, test, and publish your own private copy.
+After publication, connect your own agent and test a sample task. You can request
+recurring checks separately once that connection works.
 
 **This is an agent-assisted source/setup package, not a one-click executable installer.** You need your own private hosting account, an empty database, and an agent/developer capable of setting up the deployment. Current integration targets Sites and Cloudflare D1. Access to the needed hosting tools depends on your environment. Other hosting providers require an authentication/deployment port; uploading the build alone is insufficient.
 
@@ -26,6 +32,9 @@ The hosted approach supports phone access and an agent reading saved tasks while
 - Offers full workspace backup/restore and optional Codex project/chat metadata references.
 
 Kai and Codex are assignment labels, not agents bundled with the code. Connect your own agent and any services it needs. Email review actions do not send email; drafting requires your own authorized mail connection.
+
+Dates and times use `America/New_York`, including daylight saving time. Agent
+labels and this timezone remain fixed defaults in this release.
 
 ## What you need
 
@@ -79,6 +88,10 @@ npm run build
 
 Use the committed lockfile. The app uses React, Vinext, a Cloudflare Worker, and D1. A build produces the Worker under `dist/server/`; it does not publish. `npm start` previews the built Worker without the dev server's mock sign-in or the hosted sign-in service. GitHub pushes do not deploy an app.
 
+The four configuration tests validate an unbound public starter and skip once
+the source has a Site identity. Run them before configuration when checking a
+download. The 33 app tests also run against a configured copy.
+
 The original integrated web application passed local browser/API/agent-interface checks. This starter also has configuration tests. A fresh, independently hosted deployment by another user has not yet been verified. Do not treat these checks as proof that every agent, host, or browser installation will work without setup.
 
 ## Privacy, backups, and updates
@@ -98,5 +111,11 @@ python scripts/package-private-copy.py
 ```
 
 The builder refuses configured Site identities and excludes runtime files. ZIPs are written under ignored `outputs/`. See [third-party notices](THIRD-PARTY-NOTICES.md) for retained upstream licenses.
+
+The release includes `Research-Compass-Starter.zip.sha256`. Compare its checksum
+with `Get-FileHash Research-Compass-Starter.zip -Algorithm SHA256` in PowerShell,
+or `sha256sum Research-Compass-Starter.zip` on Linux. See
+[CHANGELOG.md](CHANGELOG.md) for changes and [VERIFICATION.md](VERIFICATION.md)
+for the checks and remaining limits.
 
 Copyright (c) 2026 Joshua Wilson. Application code is available under the [MIT license](LICENSE). Included third-party material retains its own notices. This starter has no automatic connection to an existing user's workspace, deployment, or credentials.

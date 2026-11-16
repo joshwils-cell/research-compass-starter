@@ -25,7 +25,8 @@ is unset and owner URLs/email defaults are replaced with example values. It
 contains no installed dependencies, database exports, access tokens, stored
 projects, credentials, agent schedules, or Git history.
 
-Unzip it into a new folder. Begin with `PRIVATE-COPY-START-HERE.md`. Use an empty
+Unzip it into a new folder and open that folder in Codex. Begin with
+`PRIVATE-COPY-START-HERE.md` and its copyable setup prompt. Use an empty
 folder and a new private deployment; do not unzip over a working installation.
 
 ## Set up a new independent private copy
@@ -62,6 +63,14 @@ folder and a new private deployment; do not unzip over a working installation.
    the host's migration process. Build/package the Worker from that exact source
    commit, publish to the new private Site, and wait for a successful deployment.
    GitHub upload alone does not deploy or initialize a database.
+
+   The setup agent should use the current Sites skill for source access,
+   migration, packaging, and private publication. Retain the source credential
+   returned at registration and keep credentials in memory/stdin. Configure the
+   neutral downloaded copy before transferring it into the new Site's checkout;
+   the configuration helper deliberately refuses an already-bound source copy.
+   Preserve the new checkout's Site ID, `DB` binding, and MCP declaration. Do not
+   run a default starter generator over the Research Compass application.
 6. **Verify a genuinely empty workspace** in your own account. Create a sample
    project and a task, refresh, and confirm they persist. Sign out and confirm
    private records are inaccessible without sign-in. Use the actual new URL on
@@ -71,21 +80,12 @@ If the same owner wants to restore their own backup, use Settings → Restore on
 after testing, into an empty workspace. A new recipient should never import
 another person's backup. Do not add private backup JSON to a code repository or ZIP.
 
-### Prompt to give a setup agent
+### Prompt to give Codex
 
-> Set up this Research Compass source starter as my own independent private
-> hosted app. Check whether you have the Sites provisioning tools first. Create
-> one new owner-private Site in my account with its own empty D1 database; reuse
-> it if registration already succeeded. Copy the returned identity exactly and
-> configure the starter using scripts/configure-private-copy.mjs with my new URL
-> and email. Install the locked dependencies, initialize an isolated local test
-> database, run the tests and TypeScript checks, and build. Publish through the
-> new Site's source/migration workflow and preserve owner-only access. Do not
-> reuse the original owner's Site identity, data, credentials, OAuth client, or
-> plugin. Verify persistence, private sign-in, and a synthetic agent task before
-> using real work. If this environment cannot provision private Sites, explain
-> that limitation; do not substitute a public deployment or promise the current
-> sign-in will work on an unrelated host.
+Copy the full prompt from [PRIVATE-COPY-START-HERE.md](../PRIVATE-COPY-START-HERE.md).
+It covers the same sequence, including checking for Sites access before creating
+anything. Keep that file open if setup is interrupted so the agent can resume
+with the Site identity it already received.
 
 ## Connect the person's own AI agent
 
@@ -109,8 +109,14 @@ and the previously reviewed result. Confirm that a subsequent result preserves
 the earlier history. Email tasks create unsent drafts and never send because of
 an approval button alone.
 
+Dates and times use `America/New_York`, including daylight saving time. This
+release keeps that timezone and the Kai/Codex labels fixed.
+
 If the agent supports scheduled checks, the person sets up a schedule in their
-own agent service. The ZIP does not create one. A suitable instruction is:
+own agent service after the synthetic task flow works. The ZIP does not create
+one. For Codex, an example separate request is: "Check my Research Compass for
+ready tasks assigned to Codex every 30 minutes." Ask Codex to confirm the actual
+schedule and execution environment it configured. A suitable task instruction is:
 
 > Review Research Compass for context. Work only on active, ready tasks assigned
 > to your label. Read userResponse and executionGuidance before continuing a
@@ -153,6 +159,11 @@ maintenance scripts, not a new-user wizard. They store credentials with Windows
 DPAPI for the current Windows user. Do not distribute an installed user's XML
 credential file. Helpers read project/chat list metadata, not transcripts or
 source files, and cannot refresh from a powered-off source computer.
+
+Both installers now use hidden WScript launchers. Once set up, they do not
+require a minimized PowerShell window. Installing these helpers does not create
+or change a recurring agent check. First-time Windows credential provisioning
+is not part of the guided setup in this release.
 
 ## Other private hosts and computer-only installers
 
@@ -199,7 +210,9 @@ python scripts/package-private-copy.py
 ```
 
 The builder copies committed files only, refuses a configured Site identity,
-excludes runtime/private files, and checks the resulting ZIP. Review the ZIP and test a
-fresh independent deployment before distributing it to recipients. Retain the application MIT license and the included third-party
+excludes runtime/private files, and checks the resulting ZIP. Extract and test
+the ZIP in a fresh directory, review it for private material, and record which
+checks actually passed. Keep independent hosted deployment marked unverified
+until it is tested in another installation. Retain the application MIT license and the included third-party
 license notices. No one-click independent cloud deployment was performed as
 part of creating this repository and starter.

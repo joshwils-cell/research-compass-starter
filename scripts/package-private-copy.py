@@ -1,5 +1,6 @@
 """Package committed, unconfigured public starter source; never package a live instance."""
 import io
+import hashlib
 import json
 import subprocess
 import zipfile
@@ -27,9 +28,9 @@ def package():
                 continue
             name = entry.filename
             parts = Path(name).parts
-            if any(part in {'.git','node_modules','.wrangler','.sites-runtime','.test-data','dist','outputs'} for part in parts):
+            if any(part in {'.git','node_modules','.wrangler','.sites-runtime','.test-data','.next','.vinext','coverage','dist','outputs','work','.codex','.agents'} for part in parts):
                 raise SystemExit('Runtime file in committed source: ' + name)
-            if any(part.startswith(('.env','.dev.vars')) for part in parts) or name.endswith(('.pem','.sqlite','.db','.rrsetup.json')):
+            if any(part.startswith(('.env','.dev.vars')) for part in parts) or name.endswith(('.pem','.sqlite','.sqlite-wal','.sqlite-shm','.db','.rrsetup.json','.log','.xml')):
                 raise SystemExit('Private/runtime file in committed source: ' + name)
             data = source.read(entry)
             if name == 'STARTER-PROVENANCE.json':
@@ -41,6 +42,10 @@ def package():
         assert 'LICENSE' in archive.namelist()
         assert 'PRIVATE-COPY-START-HERE.md' in archive.namelist()
     print(output)
+    checksum = hashlib.sha256(output.read_bytes()).hexdigest()
+    checksum_file = output.with_suffix('.zip.sha256')
+    checksum_file.write_text(f'{checksum}  {output.name}\n', encoding='utf-8')
+    print(checksum_file)
     print(f'Packaged {count} committed files with an unset Site ID and included license. No Git history, dependencies, or runtime directories were packaged.')
 
 if __name__ == '__main__':

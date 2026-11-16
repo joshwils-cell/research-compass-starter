@@ -1,5 +1,11 @@
 # Codex context picker and refresh
 
+The optional Windows helpers launch through `wscript.exe //B //NoLogo` using
+`Launch-CatalogSync.vbs` and `Launch-RefreshListener.vbs`. Each wrapper starts
+PowerShell hidden from launch, waits for completion, and passes its exit code
+to Task Scheduler. Users do not need to keep a terminal minimized. The helpers
+are separate from scheduled Codex task checks and do not configure those checks.
+
 New project opens the saved Codex project picker. Search and select one or more projects, optionally expand them to select chats, then choose Add selected projects. Existing Research Compass projects are reopened with their saved work. Create a project manually opens the standalone name and description form.
 
 Link Codex context shows projects as accordions. Select the parent reference, selected child chats, or both. Selecting a project does not silently select all its chats. Chats keep explicit source project membership, including after linking. Unassigned chats have a separate group. The picker saves references and list metadata; it does not transfer files or chat messages.
