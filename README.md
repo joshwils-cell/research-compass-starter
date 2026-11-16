@@ -6,9 +6,15 @@ Research Compass keeps projects and next steps together, including dated tasks, 
 
 ## Start here
 
-- [Download the starter ZIP](https://github.com/joshwils-cell/research-compass-starter/releases)
+- [Download v0.1.1](https://github.com/joshwils-cell/research-compass-starter/releases/tag/v0.1.1) and choose **Research-Compass-Starter.zip** under Assets.
 - [Set up your private copy](docs/PRIVATE-COPY-SETUP.md)
 - [Read the verification limits](VERIFICATION.md)
+
+Unzip into a new folder, open that folder in Codex, and paste the setup prompt
+in [PRIVATE-COPY-START-HERE.md](PRIVATE-COPY-START-HERE.md). Codex first checks
+for Sites access, then helps configure, test, and publish your own private copy.
+After publication, connect your own agent and test a sample task. You can request
+recurring checks separately once that connection works.
 
 **This is an agent-assisted source/setup package, not a one-click executable installer.** You need your own private hosting account, an empty database, and an agent/developer capable of setting up the deployment. Current integration targets Sites and Cloudflare D1. Access to the needed hosting tools depends on your environment. Other hosting providers require an authentication/deployment port; uploading the build alone is insufficient.
 
@@ -26,6 +32,9 @@ The hosted approach supports phone access and an agent reading saved tasks while
 - Offers full workspace backup/restore and optional Codex project/chat metadata references.
 
 Kai and Codex are assignment labels, not agents bundled with the code. Connect your own agent and any services it needs. Email review actions do not send email; drafting requires your own authorized mail connection.
+
+Dates and times use `America/New_York`, including daylight saving time. Agent
+labels and this timezone remain fixed defaults in this release.
 
 ## What you need
 
