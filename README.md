@@ -88,6 +88,10 @@ npm run build
 
 Use the committed lockfile. The app uses React, Vinext, a Cloudflare Worker, and D1. A build produces the Worker under `dist/server/`; it does not publish. `npm start` previews the built Worker without the dev server's mock sign-in or the hosted sign-in service. GitHub pushes do not deploy an app.
 
+The four configuration tests validate an unbound public starter and skip once
+the source has a Site identity. Run them before configuration when checking a
+download. The 33 app tests also run against a configured copy.
+
 The original integrated web application passed local browser/API/agent-interface checks. This starter also has configuration tests. A fresh, independently hosted deployment by another user has not yet been verified. Do not treat these checks as proof that every agent, host, or browser installation will work without setup.
 
 ## Privacy, backups, and updates

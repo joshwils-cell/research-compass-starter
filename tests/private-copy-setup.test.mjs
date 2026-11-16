@@ -1,9 +1,12 @@
-import {test} from 'node:test';
+import {test as nodeTest} from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
+
+const configured=Boolean(JSON.parse(fs.readFileSync(new URL('../.openai/hosting.json',import.meta.url),'utf8')).project_id);
+const test=(name,run)=>nodeTest(name,{skip:configured?'Configuration tests apply to an unbound public starter.':false},run);
 
 function fixture(run){
   const parent=fs.realpathSync(os.tmpdir()),root=fs.mkdtempSync(path.join(parent,'compass-private-copy-'));
