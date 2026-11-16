@@ -1,11 +1,42 @@
 # Verification and limits
 
-The integrated web application underlying this starter passed 33 automated app tests covering tasks, claims, reconciliation, reviewed results, dates, the Codex catalog, and task ordering. Two additional tests cover independent-copy configuration and rejection of already-bound Site identities.
+## v0.1.1 release checks — November 16, 2026
 
-The maintainer also verified a locked dependency installation, TypeScript, a production build, and initialization of an empty local D1 database. Local browser/API/MCP checks used synthetic tasks, including replies and preservation of earlier results.
+The release ZIP was extracted into a fresh folder and installed with the locked
+dependencies using `npm run install:ci`. Checks passed for:
 
-The public starter passed a clean locked installation, all 33 app tests and two configuration tests, TypeScript, a production build with an unset Site identity, and initialization of an empty local D1 database. The source and release package were checked for original owner settings and credential-like strings. Its example defaults must be replaced for real hosting. No private production data, credentials, or migration record is included.
+- All 33 app tests, including another run after configuring a synthetic owner.
+- Four configuration tests on the neutral starter, including both optional sync
+  endpoints, invalid input, and rejection of an already-bound Site identity.
+  These tests correctly skip in a configured copy; app tests remain available.
+- TypeScript and production builds of neutral and synthetic configured source.
+- Initialization of an empty isolated local D1 database from the tracked schema.
+- PowerShell installer parsing and synthetic hidden-launcher execution. Both
+  wrappers returned the child script's expected exit code to the caller.
+- Packager acceptance of neutral committed source and rejection of configured
+  Site identities, credential XML, and committed build-cache files.
+- Source and ZIP scans for original owner settings, credential-like strings,
+  database files, runtime state, and legacy desktop maintenance material.
 
-Not yet established: a second real independently hosted deployment, every third-party agent client, actual device installation across browsers, or unattended scheduled agent execution with the source computer off. A successful local task-interface check does not establish access to transcripts, local files, or external services.
+The app, schema, and app tests match the current personal source after replacing
+owner-specific defaults with public examples. The public starter retains its
+own Git history; no private repository history was merged. Each release ZIP
+records its public source commit in `STARTER-PROVENANCE.json`, and the builder
+emits a companion SHA-256 checksum. Example values must be configured for hosting.
 
-The package is an agent-assisted setup starter. It is not a one-click executable installer, an automatic cloud-provisioning wizard, an offline app, or a shared public service.
+Earlier local browser/API/MCP checks of the integrated application used synthetic
+tasks, including replies and preservation of earlier results. Those are prior
+application checks, not a second independently hosted deployment of this release.
+
+## Still unverified
+
+A fresh independently hosted deployment, actual installation across devices,
+every third-party agent client, and unattended agent checks with the source
+computer off have not been established. Synthetic launcher checks do not prove
+Windows sign-in behavior on another person's computer. A local task-interface
+test does not establish access to transcripts, local files, or external services.
+
+This release is an agent-assisted source/setup package. It does not provide a
+one-click executable installer, automatic account provisioning, offline editing,
+a shared public service, or first-time Windows sync credential setup. Each user
+needs their own private Site, database, authorized agent, and service connections.

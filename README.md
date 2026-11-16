@@ -112,4 +112,10 @@ python scripts/package-private-copy.py
 
 The builder refuses configured Site identities and excludes runtime files. ZIPs are written under ignored `outputs/`. See [third-party notices](THIRD-PARTY-NOTICES.md) for retained upstream licenses.
 
+The release includes `Research-Compass-Starter.zip.sha256`. Compare its checksum
+with `Get-FileHash Research-Compass-Starter.zip -Algorithm SHA256` in PowerShell,
+or `sha256sum Research-Compass-Starter.zip` on Linux. See
+[CHANGELOG.md](CHANGELOG.md) for changes and [VERIFICATION.md](VERIFICATION.md)
+for the checks and remaining limits.
+
 Copyright (c) 2026 Joshua Wilson. Application code is available under the [MIT license](LICENSE). Included third-party material retains its own notices. This starter has no automatic connection to an existing user's workspace, deployment, or credentials.
