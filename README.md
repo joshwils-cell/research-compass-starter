@@ -90,7 +90,7 @@ Use the committed lockfile. The app uses React, Vinext, a Cloudflare Worker, and
 
 The four configuration tests validate an unbound public starter and skip once
 the source has a Site identity. Run them before configuration when checking a
-download. The 33 app tests also run against a configured copy.
+download. The 39 app tests also run against a configured copy.
 
 The original integrated web application passed local browser/API/agent-interface checks. This starter also has configuration tests. A fresh, independently hosted deployment by another user has not yet been verified. Do not treat these checks as proof that every agent, host, or browser installation will work without setup.
 
@@ -119,3 +119,9 @@ or `sha256sum Research-Compass-Starter.zip` on Linux. See
 for the checks and remaining limits.
 
 Copyright (c) 2026 Joshua Wilson. Application code is available under the [MIT license](LICENSE). Included third-party material retains its own notices. This starter has no automatic connection to an existing user's workspace, deployment, or credentials.
+
+## Calendar and return navigation
+
+Use Calendar view for month, week and day views of scheduled actions and due dates,
+including independent entries without a project. Each project also has a Back to
+projects list button below its task list. See [Calendar behavior and isolated tests](docs/CALENDAR.md).

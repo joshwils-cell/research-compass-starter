@@ -1,5 +1,24 @@
 # Verification and limits
 
+## Calendar source checks — November 17, 2026
+
+- All 39 app tests and four neutral-copy configuration tests passed.
+- TypeScript and production builds passed in both maintained repositories.
+- Calendar/date tests also passed with Pacific/Auckland as the process timezone.
+- The corresponding application flow passed isolated local D1/API and built-Worker
+  browser checks: project return, month/week/day, task rescheduling, standalone
+  due/action entries, deletion/restoration, persistence, DST and access rejection.
+- At 390 px, the page fits; month/week scroll within the calendar and day fits.
+  Dialog Escape restores focus. Keyboard/date controls and textual labels were checked.
+- Only reviewed generic files were transferred. The Site identity stays unset,
+  example defaults and licenses stay intact, and private history is excluded.
+
+These are source checks, not a new downloadable release or an independent hosted
+starter installation. Real phone hardware and a full assistive-technology audit
+remain unverified. The local Vinext development optimizer had a dependency-loading
+failure; browser checks used the successful built Worker with a loopback-only
+synthetic sign-in gateway, documented in `docs/CALENDAR.md`.
+
 ## v0.1.1 release checks — November 16, 2026
 
 The release ZIP was extracted into a fresh folder and installed with the locked

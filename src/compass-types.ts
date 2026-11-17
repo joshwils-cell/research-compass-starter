@@ -6,6 +6,8 @@ export interface WorkItem {
   notes: string;
   date?: string;
   time?: string;
+  dueDate?: string;
+  dueTime?: string;
   completedAt?: string;
   archivedAt?: string;
   assignee?: Assignee;
@@ -45,10 +47,11 @@ export interface HandoffInput {
   instructions: string;
   target?:'kai'|'codex';
 }
-export interface LocalState { projects: LocalProject[]; backupPath?: string }
+export interface LocalState { projects: LocalProject[]; backupPath?: string; calendar?: import('./calendar').CalendarState }
 export interface CompassBridge {
   installSkill():Promise<string>;
   state(): Promise<LocalState>;
+  calendar(revision:number,entry:import('./calendar').CalendarEntry):Promise<void>;
   save(input: { id?: string; revision?: number; name: string; purpose: string }): Promise<LocalProject>;
   items(id: string, revision: number, kind: 'steps'|'followUps', items: WorkItem[]): Promise<void>;
   work(id: string, revision: number, items: import('./next-steps').NextStep[]): Promise<void>;
