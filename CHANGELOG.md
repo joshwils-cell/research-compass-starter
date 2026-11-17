@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased — November 17, 2026
+
+- Added bottom project-list return navigation and month/week/day calendar views.
+- Kept scheduled actions distinct from task/independent due dates; added recoverable
+  independent entry deletion, date history, stale-write guards, and isolated checks.
+- Retained neutral defaults, unset hosting identity, MIT license and separate history.
+
 ## v0.1.1 — November 16, 2026
 
 - Added a guided Codex setup prompt and public-repository instructions for
