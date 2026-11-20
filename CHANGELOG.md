@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Added optional Auto, Local, and Cloud execution preferences for Kai tasks.
+- Added project default GitHub repository URLs and task overrides, with manual
+  URL fallback and explicit unresolved cloud targets.
+- Exposed additive execution metadata in the version-1 hosted task interface.
+- Preserved neutral defaults, existing task history, claims, dates, and permissions.
+- Live repository/environment discovery and job launching are not included.
+
 ## v0.2.0 — November 19, 2026
 
 - Added phone/browser Back and Forward navigation for project views using normal browser history; the blue return button uses the same history.

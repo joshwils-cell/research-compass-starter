@@ -11,6 +11,7 @@ export interface WorkItem {
   completedAt?: string;
   archivedAt?: string;
   assignee?: Assignee;
+  execution?: import('./execution').TaskExecution;
   workStatus?: 'working'|'awaiting_review'|'needs_input';
   actionKind?: 'task'|'email';
   emailAccount?: string;
@@ -31,6 +32,7 @@ export interface ContextSelection {projectIds:string[];chatIds:string[]}
 export interface CodexProjectOption { id:string; title:string; roots:string[] }
 export interface CodexLink { id: string; title: string; kind: 'project' | 'conversation'; url?: string; projectId?:string; parentProjectId?:string; parentProjectTitle?:string; roots?:string[] }
 export interface LocalProject extends Project {
+  defaultCloudRepository?: import('./execution').GitHubRepository;
   localVersion: 1;
   steps: WorkItem[];
   followUps: WorkItem[];
@@ -52,7 +54,7 @@ export interface CompassBridge {
   installSkill():Promise<string>;
   state(): Promise<LocalState>;
   calendar(revision:number,entry:import('./calendar').CalendarEntry):Promise<void>;
-  save(input: { id?: string; revision?: number; name: string; purpose: string }): Promise<LocalProject>;
+  save(input: { id?: string; revision?: number; name: string; purpose: string; defaultCloudRepository?: import('./execution').GitHubRepository|null }): Promise<LocalProject>;
   items(id: string, revision: number, kind: 'steps'|'followUps', items: WorkItem[]): Promise<void>;
   work(id: string, revision: number, items: import('./next-steps').NextStep[]): Promise<void>;
   review(id: string, revision: number, input: ReviewInput): Promise<void>;

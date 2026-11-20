@@ -10,13 +10,16 @@ import {LinkDialog,SavedContext} from './CodexContext';
 import {CalendarView} from './CalendarView';
 import {nextSteps,nextStepKey} from './next-steps';
 import {useProjectNavigation} from './use-project-navigation';
+import {repositoryFromUrl,type GitHubRepository} from './execution';
+import {RepositoryField} from './ExecutionFields';
 
 const api=()=>window.compass;
 const message=(e:unknown)=>e instanceof Error?e.message:String(e);
-function ProjectForm({project,close,save}:{project?:LocalProject;close:()=>void;save:(name:string,purpose:string)=>Promise<void>}){
+function ProjectForm({project,close,save}:{project?:LocalProject;close:()=>void;save:(name:string,purpose:string,repository:GitHubRepository|null)=>Promise<void>}){
   const [name,setName]=useState(project?.name||''),[purpose,setPurpose]=useState(project?.purpose||''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
-  async function submit(e:FormEvent){e.preventDefault();setBusy(true);try{await save(name,purpose);close();}catch(e){setError(message(e));}finally{setBusy(false);}}
-  return <Modal title={project?'Edit project':'New project'} close={close}><form onSubmit={submit}><label>Project name<input autoFocus required maxLength={160} value={name} onChange={e=>setName(e.target.value)}/></label><label>Description<textarea aria-label="Description" rows={5} maxLength={50000} value={purpose} onChange={e=>setPurpose(e.target.value)} placeholder="Purpose, desired outcome, and context"/></label><p className="muted">Saved privately online. Your phone and laptop share the same records.</p>{error&&<p role="alert" className="error">{error}</p>}<footer><button type="button" onClick={close}>Cancel</button><button className="primary" disabled={busy||!name.trim()}>{project?'Save project':'Create project'}</button></footer></form></Modal>;
+  const [repoUrl,setRepoUrl]=useState(project?.defaultCloudRepository?.url||'');
+  async function submit(e:FormEvent){e.preventDefault();setBusy(true);try{const parsed=repositoryFromUrl(repoUrl);await save(name,purpose,parsed?.url===project?.defaultCloudRepository?.url?project?.defaultCloudRepository||null:parsed||null);close();}catch(e){setError(message(e));}finally{setBusy(false);}}
+  return <Modal title={project?'Edit project':'New project'} close={close}><form onSubmit={submit}><label>Project name<input autoFocus required maxLength={160} value={name} onChange={e=>setName(e.target.value)}/></label><label>Description<textarea aria-label="Description" rows={5} maxLength={50000} value={purpose} onChange={e=>setPurpose(e.target.value)} placeholder="Purpose, desired outcome, and context"/></label><RepositoryField label="Default GitHub repository (optional)" value={repoUrl} onChange={setRepoUrl}/><p className="muted">Preselected for new cloud tasks. Existing tasks keep their saved repository.</p><p className="muted">Saved privately online. Your phone and laptop share the same records.</p>{error&&<p role="alert" className="error">{error}</p>}<footer><button type="button" onClick={close}>Cancel</button><button className="primary" disabled={busy||!name.trim()}>{project?'Save project':'Create project'}</button></footer></form></Modal>;
 }
 function Handoff({project,close}:{project:LocalProject;close:()=>void}){
   const initialTarget=project.steps.concat(project.followUps).some(i=>!i.completedAt&&!i.archivedAt&&i.assignee==='kai')?'kai':'codex';
@@ -64,8 +67,8 @@ export default function App(){
       {!p.archivedAt&&<footer className="project-footer"><span>Keep inactive projects and their work history.</span><button disabled={busy} onClick={()=>void act(()=>api().archive(p.id,p.revision,true))}><Archive size={16}/>Archive project</button></footer>}
     </>)}
     </main>
-    {modal==='manual'&&<ProjectForm close={()=>setModal(null)} save={async(name,purpose)=>{const p=await api().save({name,purpose});await load();openProject(p.id);}}/>}
-    {modal==='edit'&&p&&<ProjectForm project={p} close={()=>setModal(null)} save={async(name,purpose)=>{await commit(()=>api().save({id:p.id,revision:p.revision,name,purpose}));}}/>}
+    {modal==='manual'&&<ProjectForm close={()=>setModal(null)} save={async(name,purpose,defaultCloudRepository)=>{const p=await api().save({name,purpose,defaultCloudRepository});await load();openProject(p.id);}}/>}
+    {modal==='edit'&&p&&<ProjectForm project={p} close={()=>setModal(null)} save={async(name,purpose,defaultCloudRepository)=>{await commit(()=>api().save({id:p.id,revision:p.revision,name,purpose,defaultCloudRepository}));}}/>}
     {(modal==='new'||modal==='link'||modal==='import')&&<LinkDialog project={modal==='link'?p:undefined} createManually={modal==='new'?()=>setModal('manual'):undefined} close={()=>setModal(null)} done={async id=>{await load();if(id)openProject(id);}}/>}
     {modal==='handoff'&&p&&<Handoff project={p} close={()=>setModal(null)}/>}
     {modal==='agents'&&<AgentSetup close={()=>setModal(null)}/>}

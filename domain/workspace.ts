@@ -4,6 +4,8 @@ import { Store } from './store';
 import {workItem,taskActivity} from './task-schema';
 import {actionLabel} from '../src/task-status';
 import {nextSteps,nextStepKey} from '../src/next-steps';
+import {githubRepository} from './execution-schema';
+import {executionView} from '../src/execution';
 import type { LocalProject, HandoffInput, CodexLink, CodexProjectOption, WorkItem } from '../src/compass-types';
 
 export const linkInput = z.object({ id:z.string().max(200).optional(), title:z.string().trim().min(1).max(500), kind:z.enum(['project','conversation']), url:z.string().url().refine(s=>new URL(s).protocol==='https:','Use an HTTPS link.').optional(),projectId:z.string().min(1).max(200).optional(),parentProjectId:z.string().max(200).optional(),parentProjectTitle:z.string().max(500).optional(),roots:z.array(z.string().max(4000)).max(100).optional() });
@@ -21,9 +23,9 @@ export class Workspace {
     this.store.transaction(()=>{const p=this.get(id);if(p.revision!==revision)throw new Error('This project changed in another window. Reopen it before saving.');this.store.put({...fn(p),revision:p.revision+1,pendingId:undefined});});
   }
   save(value:unknown){
-    const input=z.object({id:z.string().uuid().optional(),revision:z.number().int().optional(),name:z.string().trim().min(1).max(160),purpose:z.string().max(50000)}).parse(value);
-    if(input.id){if(input.revision===undefined)throw new Error('Project revision required.');this.change(input.id,input.revision,p=>({...p,name:input.name,purpose:input.purpose}));return this.get(input.id);}
-    const p:LocalProject={id:randomUUID(),name:input.name,purpose:input.purpose,createdAt:new Date().toISOString(),revision:1,localVersion:1,steps:[],followUps:[],codexLinks:[],folders:[],extensions:[],exclusions:[],threads:[],imports:[],pins:[],snapshots:[]};
+    const input=z.object({id:z.string().uuid().optional(),revision:z.number().int().optional(),name:z.string().trim().min(1).max(160),purpose:z.string().max(50000),defaultCloudRepository:githubRepository.nullable().optional()}).parse(value);
+    if(input.id){if(input.revision===undefined)throw new Error('Project revision required.');this.change(input.id,input.revision,p=>({...p,name:input.name,purpose:input.purpose,...(input.defaultCloudRepository===undefined?{}:{defaultCloudRepository:input.defaultCloudRepository||undefined})}));return this.get(input.id);}
+    const p:LocalProject={id:randomUUID(),name:input.name,purpose:input.purpose,createdAt:new Date().toISOString(),revision:1,localVersion:1,defaultCloudRepository:input.defaultCloudRepository||undefined,steps:[],followUps:[],codexLinks:[],folders:[],extensions:[],exclusions:[],threads:[],imports:[],pins:[],snapshots:[]};
     this.store.put(p);return p;
   }
   items(id:string,revision:number,kind:'steps'|'followUps',value:unknown){
@@ -103,6 +105,7 @@ export function handoff(p:LocalProject,input:HandoffInput){
   lines.push(...(links.length?links.map(l=>`- ${l.kind==='project'?'Project':'Conversation'}: ${l.title}${l.url?` — ${l.url}`:` (reference ID: ${l.projectId||l.id})`}${l.roots?.length?`\n  Project location: ${l.roots.join('; ')}`:''}`):['No linked destination selected. Choose the destination in Codex.']));
   const selected=nextSteps(p).filter(e=>(e.kind==='steps'?input.stepIds:input.followUpIds).includes(e.item.id));
   lines.push('','## Selected next steps',...selected.flatMap(({kind,item:s},i)=>[`${i+1}. ${s.text}`,`   Task ID: ${s.id} (${kind}); For: ${s.assignee||'me'}${s.date?`; Act on: ${actionLabel(s)} (America/New_York)`:''}${s.actionKind==='email'?`; Gmail draft account: ${s.emailAccount||'you@example.com'}`:''}`,...(s.notes?[`   Notes: ${s.notes.replaceAll('\n','\n   ')}`]:[])]));
+  lines.push('','## Execution preferences',...selected.flatMap(({item})=>{const view=executionView(item);return [`- ${item.text}: ${JSON.stringify({execution:item.execution||null,...view})}`];}));
   lines.push('','## File references (no files attached)','These are references only. No file bytes are included. A path, URL or linked project does not establish file access. Ask for any files you cannot access.');
   lines.push(...(input.references.length?input.references.map(r=>`- ${r}`):['No file references selected.']));
   lines.push('','## Execution guidance','Work only when asked. Email tasks produce unsent drafts for review. Default Gmail account: you@example.com. Record results through the Research Compass task interface; preparing this handoff does not change task status.','','## Requested outcome',input.outcome);

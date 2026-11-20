@@ -1,5 +1,21 @@
 # Verification and limits
 
+## Execution routing source checks - November 20, 2026
+
+- All 45 app tests and four neutral-copy configuration tests passed on this
+  starter base, along with TypeScript and the production build.
+- A fresh local D1 database and built Worker passed persistence, legacy/Auto/Local/
+  Cloud/default/override/non-Kai/scheduling, MCP all/ready/detail, claim/begin,
+  and synthetic unsent-draft checks. No external jobs or email actions ran.
+- Desktop and 390 x 844 browser checks covered new cloud defaults, changed-default
+  isolation, task overrides, empty cloud saves, reload, legacy notes edits, hidden
+  non-Kai controls, retained-claim edits, Back/Forward and footer Back.
+- Only generic runtime changes, synthetic tests and neutral documentation are
+  included. Hosting identity stays unset; example defaults and licenses remain.
+- Live repository/environment discovery, real launches, physical phones, fresh
+  independent hosting and unattended execution remain unverified. This is a
+  source update; the existing downloadable release is unchanged.
+
 ## v0.2.0 source checks — November 19, 2026
 
 - All 39 app tests and four neutral-copy configuration tests passed, along with

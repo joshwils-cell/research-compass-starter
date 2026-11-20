@@ -7,27 +7,44 @@ import {Modal} from './components/Modal';
 import {nextSteps,nextStepKey,type NextStep} from './next-steps';
 import {canReview,pendingReview,reviewLabels} from './task-review';
 import {ReviewForm} from './TaskReview';
+import {executionLabels,executionView,repositoryFromUrl,type GitHubRepository,type TaskExecution} from './execution';
+import {RepositoryField,CloudTargetStatus} from './ExecutionFields';
 const message=(e:unknown)=>e instanceof Error?e.message:String(e);
 function ResultDetails({result,item}:{result:NonNullable<WorkItem['result']>;item:WorkItem}){
   return <><p>{result.summary}</p>{result.artifacts.map((a,n)=><div key={n}>{a.url?<button className="text-link" onClick={()=>void window.compass.openLink(a.url!).catch(e=>window.alert(message(e)))}>{a.label} ↗</button>:<span>{a.label}</span>}{a.draftId&&<small>Draft ID: {a.draftId} · {a.emailAccount||item.emailAccount||'you@example.com'}</small>}</div>)}</>;
 }
 export function TaskDetails({item}:{item:WorkItem}){
   const response=pendingReview(item);
-  return <>{item.result&&<div className="task-result"><strong>Latest result</strong><ResultDetails result={item.result} item={item}/></div>}
+  return <>{item.assignee==='kai'&&<p className="execution-status"><strong>Execution: {executionLabels[item.execution?.route||'auto']}</strong>{item.execution?.route==='cloud'&&<>{item.execution.repository&&<> · {item.execution.repository.fullName}</>} · {executionView(item).cloudTarget?.label}</>}</p>}{item.result&&<div className="task-result"><strong>Latest result</strong><ResultDetails result={item.result} item={item}/></div>}
     {response&&<p className="response-queued" role="status">{item.workStatus==='working'?'The agent is working from your response.':!item.workStatus?'Your response is queued for the agent’s next check.':`Your response: ${reviewLabels[response.action]}.`}</p>}
     {!!item.reviews?.length&&<details className="task-response-history"><summary>Responses and reviewed results ({item.reviews.length})</summary><ol>{item.reviews.map(review=><li key={review.id}><strong>You · {reviewLabels[review.action]}</strong><small>{new Date(review.at).toLocaleString('en-US',{timeZone:'America/New_York'})} Eastern</small>{review.text&&<p className="review-text">{review.text}</p>}{review.result&&<details><summary>Result you reviewed</summary><ResultDetails result={review.result} item={item}/></details>}</li>)}</ol></details>}
     {!!item.activity?.length&&<details className="task-activity"><summary>Activity ({item.activity.length})</summary><ul>{item.activity.slice(-10).reverse().map((a,n)=><li key={n}><strong>{assigneeName(a.actor)}</strong> · {new Date(a.at).toLocaleString('en-US',{timeZone:'America/New_York'})}<br/>{a.summary}</li>)}</ul></details>}
   </>;
 }
-function ItemForm({item,close,save}:{item?:WorkItem;close:()=>void;save:(item:WorkItem)=>Promise<void>}){
+export function ItemForm({item,defaultRepository,close,save}:{item?:WorkItem;defaultRepository?:GitHubRepository;close:()=>void;save:(item:WorkItem)=>Promise<void>}){
   const [text,setText]=useState(item?.text||''),[notes,setNotes]=useState(item?.notes||''),[date,setDate]=useState(item?.date||''),[time,setTime]=useState(item?.time||''),[dueDate,setDueDate]=useState(item?.dueDate||''),[dueTime,setDueTime]=useState(item?.dueTime||''),[assignee,setAssignee]=useState<Assignee>(item?.assignee||'me'),[email,setEmail]=useState(item?.actionKind==='email'),[account,setAccount]=useState(item?.emailAccount||'you@example.com'),[status,setStatus]=useState(item?.workStatus||'ready'),[error,setError]=useState(''),[busy,setBusy]=useState(false);
+  const [execution,setExecution]=useState<TaskExecution|undefined>(item?.execution),[repoUrl,setRepoUrl]=useState(item?.execution?.repository?.url||'');
+  function chooseExecution(route:TaskExecution['route']){const repository=execution?.repository||(!item&&route==='cloud'?defaultRepository:undefined);setExecution({...execution,route,repository});if(!repoUrl&&repository)setRepoUrl(repository.url);}
+  function savedExecution(){
+    if(assignee!=='kai')return item?.execution;
+    if(!execution)return undefined;
+    if(execution.route!=='cloud')return execution;
+    const parsed=repositoryFromUrl(repoUrl);
+    const repository=parsed?.url===execution.repository?.url?execution.repository:parsed;
+    return {...execution,repository,environmentId:repository?.url===execution.repository?.url?execution.environmentId:undefined};
+  }
   return <Modal title={`${item?'Edit':'Add'} next step`} close={close}><form onSubmit={async e=>{e.preventDefault();setBusy(true);try{
-    if(item?.claim&&status==='ready')throw new Error('This task has an agent attempt. Ask the agent to reconcile its result before resetting it.');
-    await save({...item,id:item?.id||crypto.randomUUID(),text,notes,date:date||undefined,time:date?time||undefined:undefined,dueDate:dueDate||undefined,dueTime:dueDate?dueTime||undefined:undefined,assignee,actionKind:email?'email':'task',emailAccount:email?account:undefined,workStatus:status==='ready'?undefined:status as WorkItem['workStatus']});close();
+    if(item?.claim&&item.workStatus&&status==='ready')throw new Error('This task has an agent attempt. Ask the agent to reconcile its result before resetting it.');
+    await save({...item,id:item?.id||crypto.randomUUID(),text,notes,date:date||undefined,time:date?time||undefined:undefined,dueDate:dueDate||undefined,dueTime:dueDate?dueTime||undefined:undefined,assignee,execution:savedExecution(),actionKind:email?'email':'task',emailAccount:email?account:undefined,workStatus:status==='ready'?undefined:status as WorkItem['workStatus']});close();
   }catch(e){setError(message(e));}finally{setBusy(false);}}}>
     <label>Next step<textarea aria-label="Next step" autoFocus required rows={3} maxLength={20000} value={text} onChange={e=>setText(e.target.value)}/></label>
     <label>Notes (optional)<textarea aria-label="Notes (optional)" rows={3} maxLength={50000} value={notes} onChange={e=>setNotes(e.target.value)}/></label>
     <div className="form-columns"><label>For<select aria-label="For" value={assignee} onChange={e=>setAssignee(e.target.value as Assignee)}><option value="me">Me</option><option value="kai">Kai</option><option value="codex">Codex</option></select></label><label>Act on (optional)<input type="date" value={date} onChange={e=>{setDate(e.target.value);if(!e.target.value)setTime('');}}/></label><label>Time (Eastern, optional)<input type="time" step={60} disabled={!date} value={time} onChange={e=>setTime(e.target.value)}/></label></div>
+    {assignee==='kai'&&<fieldset className="execution-fields"><legend>Execution (optional)</legend><label>Execution<select aria-label="Execution" value={execution?.route||'auto'} onChange={e=>chooseExecution(e.target.value as TaskExecution['route'])}>{Object.entries(executionLabels).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
+      {(execution?.route||'auto')==='auto'&&<p className="muted">Kai can handle ordinary work directly. Older task instructions still apply.</p>}
+      {execution?.route==='local'&&<p className="muted">Use this connected computer and the existing project. If unavailable, Kai will ask for input.</p>}
+      {execution?.route==='cloud'&&<><RepositoryField value={repoUrl} onChange={value=>setRepoUrl(value)}/><CloudTargetStatus repository={repoUrl.trim()?{url:repoUrl,fullName:repoUrl}:undefined} environmentId={execution.environmentId}/></>}
+      <p className="muted">Saving this preference does not start work or authorize publishing.</p></fieldset>}
     <div className="form-columns"><label>Due date (optional)<input type="date" value={dueDate} onChange={e=>{setDueDate(e.target.value);if(!e.target.value)setDueTime('');}}/></label><label>Due time (Eastern, optional)<input type="time" step={60} disabled={!dueDate} value={dueTime} onChange={e=>setDueTime(e.target.value)}/></label></div><p className="muted">Due dates are deadlines and do not change readiness.</p>
     <p className="muted">Dates and times use Eastern time. During the repeated fall hour, the first occurrence is used. Assigned work starts only when you ask Kai or Codex.</p>
     <label className="choice"><input type="checkbox" checked={email} onChange={e=>setEmail(e.target.checked)}/>Email task — prepare an unsent draft for review</label>
@@ -62,7 +79,7 @@ export function WorkList({project,save,review,back}:{project:LocalProject;save:(
     <details><summary>Completed work ({completed.length})</summary><ol className="work-list">{completed.map((i,n)=>row(i,n,'completed'))}</ol></details>
     {!!archived.length&&<details><summary>Archived steps ({archived.length})</summary><ol className="work-list">{archived.map((i,n)=>row(i,n,'archived'))}</ol></details>}
     {back&&<div className="task-list-footer"><button onClick={back}>← Back to projects list</button></div>}
-    {editor&&<ItemForm item={editor.entry?.item} close={()=>setEditor(null)} save={item=>save(editor.entry?editor.items.map(e=>nextStepKey(e)===nextStepKey(editor.entry!)?{...e,item}:e):[...editor.items,{kind:'steps',item}],editor.revision)}/>}
+    {editor&&<ItemForm item={editor.entry?.item} defaultRepository={project.defaultCloudRepository} close={()=>setEditor(null)} save={item=>save(editor.entry?editor.items.map(e=>nextStepKey(e)===nextStepKey(editor.entry!)?{...e,item}:e):[...editor.items,{kind:'steps',item}],editor.revision)}/>}
   </section>;
 }
 export function AssignedWork({projects,open,review}:{projects:LocalProject[];open:(id:string)=>void;review?:(project:LocalProject,input:ReviewInput)=>Promise<void>}){

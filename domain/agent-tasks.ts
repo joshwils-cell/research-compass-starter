@@ -5,6 +5,7 @@ import {Store} from './store';
 import {actionDate,actionTime,taskResult,workItem,taskActivity} from './task-schema';
 import {taskStatus} from '../src/task-status';
 import {pendingReview} from '../src/task-review';
+import {executionView} from '../src/execution';
 import type {WorkItem,LocalProject} from '../src/compass-types';
 
 const request=z.object({
@@ -81,5 +82,5 @@ export class AgentTasks {
     });
   }
   checkClaim(task:WorkItem,actor:string,claimId?:string){if(!task.claim||task.claim.actor!==actor||task.claim.id!==claimId)throw new Error('A current claimId owned by this agent is required.');}
-  view(p:LocalProject,kind:'steps'|'followUps',task:WorkItem,now:Date){return {version:1,projectId:p.id,projectName:p.name,description:p.purpose,revision:p.revision,kind,status:taskStatus(task,now),task:{...task,assignee:task.assignee||'me',emailAccount:task.emailAccount||'you@example.com'},context:p.codexLinks,userResponse:pendingReview(task),executionGuidance:pendingReview(task)?'Read the owner response and its saved prior result before continuing. Request changes means revise the previous work; approve and continue means follow the owner instructions. Existing draft IDs refer to unsent drafts: inspect and update/reuse them rather than duplicating or sending. A started or uncertain existing claim must be reconciled before any new external action. Record the new result and await review.':undefined,timeZone:'America/New_York'};}
+  view(p:LocalProject,kind:'steps'|'followUps',task:WorkItem,now:Date){return {version:1,projectId:p.id,projectName:p.name,description:p.purpose,revision:p.revision,kind,status:taskStatus(task,now),task:{...task,assignee:task.assignee||'me',emailAccount:task.emailAccount||'you@example.com'},execution:executionView(task),context:p.codexLinks,userResponse:pendingReview(task),executionGuidance:pendingReview(task)?'Read the owner response and its saved prior result before continuing. Request changes means revise the previous work; approve and continue means follow the owner instructions. Existing draft IDs refer to unsent drafts: inspect and update/reuse them rather than duplicating or sending. A started or uncertain existing claim must be reconciled before any new external action. Record the new result and await review.':undefined,timeZone:'America/New_York'};}
 }

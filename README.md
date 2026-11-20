@@ -27,6 +27,7 @@ The hosted approach supports phone access and an agent reading saved tasks while
 - Organizes existing and new projects alphabetically.
 - Combines work in one Next steps list, preserving former follow-ups and their details.
 - Supports notes, completion, archiving, assignments, and optional Eastern dates/times.
+- Saves optional Auto, Local, or Cloud execution preferences for Kai tasks, with project default GitHub repository URLs and task overrides.
 - Gathers tasks across projects in Assigned work.
 - Shows scheduled actions and due dates in month, week, and day calendar views.
 - Supports phone/browser Back and Forward, plus a blue return button below each project's task list.
@@ -45,6 +46,17 @@ labels and this timezone remain fixed defaults in this release.
 Use **Calendar view** for month, week, and day views of scheduled actions and due dates, including independent entries without a project. Action dates determine when assigned work is ready; due dates are separate deadlines. See [Calendar behavior and isolated tests](docs/CALENDAR.md).
 
 From a project's **Next steps** view, use your phone/browser's **Back** button or the blue **Back to projects list** button below the task list to return to the Project List. Browser **Forward** reopens the project. Navigation uses normal browser history, including after a page refresh. Back from the Project List can leave the app normally; repeated project visits do not add duplicate history entries.
+
+## Execution preferences
+
+The current source includes an optional Execution selector for Kai tasks and a
+GitHub repository URL field for Cloud tasks. New cloud tasks can inherit a project
+default; existing task targets stay unchanged. The hosted task tool returns the
+same selection for your connected agent. Live repository/environment discovery is
+unavailable: the URL fallback remains **Not verified** until your agent verifies
+access and a matching environment. Saving never launches a job or grants additional
+permissions. See [execution behavior and local checks](docs/EXECUTION-ROUTING.md).
+The existing v0.2.0 download predates this source update.
 
 ## What you need
 
@@ -100,7 +112,7 @@ Use the committed lockfile. The app uses React, Vinext, a Cloudflare Worker, and
 
 The four configuration tests validate an unbound public starter and skip once
 the source has a Site identity. Run them before configuration when checking a
-download. The 39 app tests also run against a configured copy.
+download. The 45 app tests also run against a configured copy.
 
 The original integrated web application passed local browser/API/agent-interface checks. This starter also has configuration tests. A fresh, independently hosted deployment by another user has not yet been verified. Do not treat these checks as proof that every agent, host, or browser installation will work without setup.
 
