@@ -1,7 +1,7 @@
 # Set up your own private Research Compass
 
 1. Download **Research-Compass-Starter.zip** from the
-   [v0.1.1 release](https://github.com/joshwils-cell/research-compass-starter/releases/tag/v0.1.1).
+   [v0.2.0 release](https://github.com/joshwils-cell/research-compass-starter/releases/tag/v0.2.0).
 2. Extract it into a new folder and open that folder as a project in Codex.
 3. Paste the prompt below into a new chat in that project. Give Codex your own
    email address when it needs the task email default; do not paste passwords or tokens.

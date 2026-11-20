@@ -1,5 +1,22 @@
 # Verification and limits
 
+## v0.2.0 source checks — November 19, 2026
+
+- All 39 app tests and four neutral-copy configuration tests passed, along with
+  TypeScript and the production build before release preparation.
+- The navigation source matches the application checked in a simulated browser
+  at 390 × 844: browser Back, the blue return button, Forward, page refresh,
+  six repeated project-navigation cycles, and Back leaving from the Project List.
+- The application owner separately confirmed that the deployed navigation works
+  on their phone. The phone/browser model was not reported; this is not evidence
+  of installing a separate starter deployment on another person's device.
+- Release preparation changes version metadata and documentation only. The
+  calendar/navigation implementation and locked dependency versions are unchanged.
+
+Each release ZIP records its exact public source commit in
+`STARTER-PROVENANCE.json`; its companion `.sha256` file identifies the uploaded
+archive. The release notes record package checks and any remaining limits.
+
 ## Calendar source checks — November 17, 2026
 
 - All 39 app tests and four neutral-copy configuration tests passed.

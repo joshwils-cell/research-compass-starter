@@ -6,8 +6,9 @@ Research Compass keeps projects and next steps together, including dated tasks, 
 
 ## Start here
 
-- For the current code, clone this repository or use **Code → Download ZIP** from the `main` branch. This includes the calendar and browser Back/Forward navigation updates.
-- [Packaged v0.1.1 release](https://github.com/joshwils-cell/research-compass-starter/releases/tag/v0.1.1): choose **Research-Compass-Starter.zip** under Assets. This older release predates the calendar and navigation updates on `main`.
+- [Download Research Compass Starter v0.2.0](https://github.com/joshwils-cell/research-compass-starter/releases/download/v0.2.0/Research-Compass-Starter.zip), including the calendar and browser Back/Forward navigation updates.
+- [Release notes and SHA-256 checksum](https://github.com/joshwils-cell/research-compass-starter/releases/tag/v0.2.0). This remains an agent-assisted prerelease.
+- Developers can clone this repository or use **Code → Download ZIP** for the current `main` source.
 - [Set up your private copy](docs/PRIVATE-COPY-SETUP.md)
 - [Read the verification limits](VERIFICATION.md)
 
