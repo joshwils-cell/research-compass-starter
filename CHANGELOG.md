@@ -1,7 +1,9 @@
 # Changelog
 
-## Unreleased — November 17, 2026
+## Unreleased
 
+- Added phone/browser Back and Forward navigation for project views using normal browser history; the blue return button uses the same history.
+- Documented the current `main` source separately from the older v0.1.1 download.
 - Added bottom project-list return navigation and month/week/day calendar views.
 - Kept scheduled actions distinct from task/independent due dates; added recoverable
   independent entry deletion, date history, stale-write guards, and isolated checks.

@@ -6,11 +6,12 @@ Research Compass keeps projects and next steps together, including dated tasks, 
 
 ## Start here
 
-- [Download v0.1.1](https://github.com/joshwils-cell/research-compass-starter/releases/tag/v0.1.1) and choose **Research-Compass-Starter.zip** under Assets.
+- For the current code, clone this repository or use **Code → Download ZIP** from the `main` branch. This includes the calendar and browser Back/Forward navigation updates.
+- [Packaged v0.1.1 release](https://github.com/joshwils-cell/research-compass-starter/releases/tag/v0.1.1): choose **Research-Compass-Starter.zip** under Assets. This older release predates the calendar and navigation updates on `main`.
 - [Set up your private copy](docs/PRIVATE-COPY-SETUP.md)
 - [Read the verification limits](VERIFICATION.md)
 
-Unzip into a new folder, open that folder in Codex, and paste the setup prompt
+If downloading a ZIP, unzip into a new folder, open that folder in Codex, and paste the setup prompt
 in [PRIVATE-COPY-START-HERE.md](PRIVATE-COPY-START-HERE.md). Codex first checks
 for Sites access, then helps configure, test, and publish your own private copy.
 After publication, connect your own agent and test a sample task. You can request
@@ -26,6 +27,8 @@ The hosted approach supports phone access and an agent reading saved tasks while
 - Combines work in one Next steps list, preserving former follow-ups and their details.
 - Supports notes, completion, archiving, assignments, and optional Eastern dates/times.
 - Gathers tasks across projects in Assigned work.
+- Shows scheduled actions and due dates in month, week, and day calendar views.
+- Supports phone/browser Back and Forward, plus a blue return button below each project's task list.
 - Shows agent results and lets you Request changes, Approve and continue, or Approve and finish. Your responses and copies of reviewed results stay in the history.
 - Makes continuations ready for your agent's next check. It does not launch an agent or create a schedule.
 - Exposes an authenticated MCP task/activity interface for your own agent connection.
@@ -35,6 +38,12 @@ Kai and Codex are assignment labels, not agents bundled with the code. Connect y
 
 Dates and times use `America/New_York`, including daylight saving time. Agent
 labels and this timezone remain fixed defaults in this release.
+
+## Calendar and navigation
+
+Use **Calendar view** for month, week, and day views of scheduled actions and due dates, including independent entries without a project. Action dates determine when assigned work is ready; due dates are separate deadlines. See [Calendar behavior and isolated tests](docs/CALENDAR.md).
+
+From a project's **Next steps** view, use your phone/browser's **Back** button or the blue **Back to projects list** button below the task list to return to the Project List. Browser **Forward** reopens the project. Navigation uses normal browser history, including after a page refresh. Back from the Project List can leave the app normally; repeated project visits do not add duplicate history entries.
 
 ## What you need
 
@@ -70,7 +79,7 @@ For an isolated local preview, configuration of a hosted Site is not necessary:
 ```powershell
 npm run install:ci
 npx wrangler d1 execute DB --config deployment/local-d1.example.json --local --persist-to .wrangler/state --file drizzle/0000_nice_the_initiative.sql
-npm run dev
+npm run dev -- --host 127.0.0.1
 ```
 
 Run the initial CREATE TABLE script only once against an empty local database. Local test data stays under ignored `.wrangler/` and `.sites-runtime/` directories.
@@ -112,16 +121,10 @@ python scripts/package-private-copy.py
 
 The builder refuses configured Site identities and excludes runtime files. ZIPs are written under ignored `outputs/`. See [third-party notices](THIRD-PARTY-NOTICES.md) for retained upstream licenses.
 
-The release includes `Research-Compass-Starter.zip.sha256`. Compare its checksum
+The packaged release includes `Research-Compass-Starter.zip.sha256`; GitHub's **Code → Download ZIP** archive does not. Compare its checksum
 with `Get-FileHash Research-Compass-Starter.zip -Algorithm SHA256` in PowerShell,
 or `sha256sum Research-Compass-Starter.zip` on Linux. See
 [CHANGELOG.md](CHANGELOG.md) for changes and [VERIFICATION.md](VERIFICATION.md)
 for the checks and remaining limits.
 
 Copyright (c) 2026 Joshua Wilson. Application code is available under the [MIT license](LICENSE). Included third-party material retains its own notices. This starter has no automatic connection to an existing user's workspace, deployment, or credentials.
-
-## Calendar and return navigation
-
-Use Calendar view for month, week and day views of scheduled actions and due dates,
-including independent entries without a project. Each project also has a Back to
-projects list button below its task list. See [Calendar behavior and isolated tests](docs/CALENDAR.md).
